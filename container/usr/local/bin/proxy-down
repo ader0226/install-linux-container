@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if pgrep -x microsocks >/dev/null; then
+    pkill -x microsocks
+    echo "microsocks 已停。"
+else
+    echo "microsocks 沒在跑。"
+fi

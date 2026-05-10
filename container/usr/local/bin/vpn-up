@@ -1,25 +1,29 @@
 #!/usr/bin/env bash
+# Manual (re)start of OpenVPN. Used when the VPN drops or you want to switch
+# config. Picks the first *.ovpn under /vpn/ unless VPN_CONFIG is overridden.
 set -euo pipefail
 
-# Re-exec via sudo if not root
 if [[ $EUID -ne 0 ]]; then
     exec sudo "$0" "$@"
 fi
 
-VPN_CONFIG="${VPN_CONFIG:-/vpn/config.ovpn}"
-AUTH_FILE="${AUTH_FILE:-/vpn/auth.txt}"
 LOG=/var/log/openvpn.log
 PIDFILE=/run/openvpn.pid
+AUTH_FILE="${AUTH_FILE:-/vpn/auth.txt}"
 
 if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
     echo "openvpn 已經在跑（pid $(cat "$PIDFILE")），如要重啟請先 vpn-down。"
     exit 0
 fi
 
-if [[ ! -f "$VPN_CONFIG" ]]; then
-    echo "找不到 VPN 設定檔：$VPN_CONFIG" >&2
-    echo "請把 .ovpn 放到 host 的 ./vpn/config.ovpn（會 mount 成 /vpn/config.ovpn）" >&2
-    exit 1
+if [[ -n "${VPN_CONFIG:-}" ]]; then
+    [[ -f "$VPN_CONFIG" ]] || { echo "找不到 $VPN_CONFIG" >&2; exit 1; }
+else
+    shopt -s nullglob
+    ovpns=(/vpn/*.ovpn)
+    shopt -u nullglob
+    (( ${#ovpns[@]} > 0 )) || { echo "/vpn 中沒有 .ovpn 檔" >&2; exit 1; }
+    VPN_CONFIG="${ovpns[0]}"
 fi
 
 if [[ ! -c /dev/net/tun ]]; then
@@ -38,13 +42,10 @@ echo -n "等待 tun0 上線"
 for i in {1..30}; do
     if ip link show tun0 >/dev/null 2>&1; then
         echo " ✓"
-        echo
         ip addr show tun0 | sed -n 's/.*inet \([0-9.\/]*\).*/  tun0 IP: \1/p'
-        echo "  log:    $LOG"
+        echo "  log: $LOG"
         echo
-        echo "現在 host 端可以用 SSH 轉發 HTTP 靶機，例如："
-        echo "  ssh -p 2222 -L 8080:<TARGET_IP>:80 student@127.0.0.1"
-        echo "然後在 host 瀏覽器開 http://127.0.0.1:8080"
+        echo "host 端 browser 已連 SOCKS5 proxy，可直接開 http://靶機IP/ 連靶機"
         exit 0
     fi
     sleep 1

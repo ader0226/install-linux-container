@@ -1,1 +1,1 @@
-student ALL=(root) NOPASSWD: /usr/local/bin/vpn-up, /usr/local/bin/vpn-down, /usr/bin/apt, /usr/bin/apt-get
+student ALL=(root) NOPASSWD: /usr/local/bin/vpn-up, /usr/local/bin/vpn-down, /usr/local/bin/proxy-up, /usr/local/bin/proxy-down, /usr/bin/apt, /usr/bin/apt-get

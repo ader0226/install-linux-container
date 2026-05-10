@@ -11,5 +11,5 @@ services:
     volumes:
       - ./vpn:/vpn:ro
     ports:
-      - "127.0.0.1:2222:22"
+      - "127.0.0.1:${PROXY_PORT:-1080}:1080"
     restart: unless-stopped

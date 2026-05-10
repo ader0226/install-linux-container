@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Restart microsocks SOCKS5 proxy on :1080 (host script picks the published port).
+set -euo pipefail
+
+if pgrep -x microsocks >/dev/null; then
+    echo "microsocks 已在跑（pid $(pgrep -x microsocks | tr '\n' ' '))，先 proxy-down 再起。"
+    exit 0
+fi
+
+nohup microsocks -i 0.0.0.0 -p 1080 >/var/log/microsocks.log 2>&1 &
+disown || true
+sleep 0.3
+
+if pgrep -x microsocks >/dev/null; then
+    echo "microsocks 已啟動於 0.0.0.0:1080"
+else
+    echo "microsocks 啟動失敗，看 /var/log/microsocks.log" >&2
+    exit 1
+fi

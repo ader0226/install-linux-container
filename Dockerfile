@@ -6,10 +6,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-        openssh-server sudo ca-certificates locales tzdata \
+        sudo ca-certificates locales tzdata \
         bash-completion less man-db manpages \
         tmux ncurses-term vim nano \
-        openvpn iproute2 iputils-ping iputils-tracepath dnsutils net-tools \
+        openvpn microsocks \
+        iproute2 iputils-ping iputils-tracepath dnsutils net-tools \
         netcat-openbsd socat curl wget \
         python3 \
         whois jq file tree procps psmisc lsof \
@@ -20,16 +21,12 @@ RUN apt-get update \
 
 # Lab user with passwordless sudo for VPN ops only
 RUN useradd -m -s /bin/bash -G adm student \
- && echo 'student:student' | chpasswd \
- && mkdir -p /var/run/sshd
+ && echo 'student:student' | chpasswd
 
 # Pre-fetch a wordlist for gobuster / dirb practice
 RUN mkdir -p /usr/share/wordlists/dirbuster \
  && curl -fsSL -o /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt \
         https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/Web-Content/DirBuster-2007_directory-list-lowercase-2.3-medium.txt
-
-# SSH host keys baked in so students don't see "host key changed" on rebuilds
-RUN ssh-keygen -A
 
 COPY container/ /
 
@@ -39,9 +36,11 @@ RUN chmod 0440 /etc/sudoers.d/student \
               /usr/local/bin/cheat \
               /usr/local/bin/vpn-up \
               /usr/local/bin/vpn-down \
+              /usr/local/bin/proxy-up \
+              /usr/local/bin/proxy-down \
  && chown -R student:student /home/student
 
-EXPOSE 22
+EXPOSE 1080
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
