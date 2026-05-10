@@ -1,8 +1,16 @@
 # install-linux-container universal installer (Windows / PowerShell 5.1+)
 # 在含有 xxx.ovpn 的目錄下執行：
-#   iex "& { $(iwr -useb <INSTALL_URL>) }"
+#   iex (irm <INSTALL_URL>)
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
+
+# 強制 UTF-8 console，避免 zh-TW / zh-CN Windows（預設 CP950 / CP936）把
+# Chinese / Unicode 符號（✓ ⚠ ↻ ═）印成 ?。Write-Host / Write-Output 都
+# 走 [Console]::OutputEncoding，這行設好後整支腳本的中文輸出都會正確。
+try {
+  [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+  $OutputEncoding           = [System.Text.UTF8Encoding]::new()
+} catch {}
 
 $Image = if ($env:LINUX_CONTAINER_IMAGE) { $env:LINUX_CONTAINER_IMAGE } else { 'ghcr.io/ader0226/install-linux-container:latest' }
 

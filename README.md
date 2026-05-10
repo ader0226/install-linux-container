@@ -14,7 +14,7 @@
    ```
    ```powershell
    # Windows PowerShell
-   iex "& { $(iwr -useb https://install-linux-container.ader.pw/) }"
+   iex (irm https://install-linux-container.ader.pw/)
    ```
 
 腳本會自動：
