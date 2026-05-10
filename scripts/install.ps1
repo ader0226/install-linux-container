@@ -2,7 +2,12 @@
 # 在含有 xxx.ovpn 的目錄下執行：
 #   iex (irm <INSTALL_URL>)
 #Requires -Version 5.1
-$ErrorActionPreference = 'Stop'
+# EAP=Continue：腳本會大量呼叫 docker / docker compose，這些 native
+# command 會把 progress（"Pulling"、"Started"）寫 stderr。配 EAP=Stop
+# 時 PS 5.1 會把每一行 stderr 包成 NativeCommandError 直接 throw，
+# 整支 script 立刻中斷。改成 Continue，靠後面每個 docker 呼叫的
+# `if ($LASTEXITCODE -ne 0)` 檢查掌握成敗。
+$ErrorActionPreference = 'Continue'
 
 # 強制 UTF-8 console，避免 zh-TW / zh-CN Windows（預設 CP950 / CP936）把
 # Chinese / Unicode 符號（✓ ⚠ ↻ ═）印成 ?。Write-Host / Write-Output 都
