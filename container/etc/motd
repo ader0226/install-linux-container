@@ -6,8 +6,13 @@
   │   cheat       速查表：cheat shell | reverse-shell |        │
   │                       tmux | thm                           │
   │   lab-help    再次顯示這個訊息                             │
-  │   vpn-up      啟動 OpenVPN（連 TryHackMe）                 │
+  │   vpn-up      （重新）啟動 OpenVPN                         │
   │   vpn-down    斷開 OpenVPN                                 │
+  │   proxy-up    （重新）啟動 SOCKS5 proxy                    │
+  │   proxy-down  停止 SOCKS5 proxy                            │
+  ├────────────────────────────────────────────────────────────┤
+  │   VPN 與 SOCKS5 proxy 在容器啟動時已自動上線。             │
+  │   host 端 browser 透過 proxy 連到 VPN 網段，可直接逛靶機。 │
   ├────────────────────────────────────────────────────────────┤
   │   建議先 `tmux` 進入多 pane 模式：                         │
   │     Ctrl-b |       垂直分割（lab 自訂）                    │

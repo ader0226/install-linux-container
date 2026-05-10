@@ -1,13 +1,11 @@
-把 TryHackMe 下載的 OpenVPN 設定檔放在這個資料夾，命名為：
+這個資料夾只有「在 repo 根目錄直接 docker compose up（開發者測試 image 時）」會用到。
 
-  vpn/config.ovpn
+一般使用者**不會**用到這個資料夾。使用方式是：
+  cd 到放有 xxx.ovpn 的任意目錄，執行 install 指令即可。
+  install 腳本會把該目錄當作 /vpn:ro mount 進容器，自動抓 *.ovpn。
 
-THM 的設定檔已內含憑證，不需要 auth.txt。
-若你的 VPN 提供者要帳密，再多放一個：
-
-  vpn/auth.txt
-    第 1 行：username
-    第 2 行：password
-
-容器內會 mount 成 /vpn （唯讀）。
-進入容器後執行 `vpn-up` 即可連線。
+開發者本地測試 image：把任意 *.ovpn 放在這裡（會被 .gitignore 忽略），
+然後從 repo 根目錄執行：
+  docker compose build
+  docker compose up -d
+  docker compose exec -u student lab bash
