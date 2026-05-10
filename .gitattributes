@@ -1,0 +1,11 @@
+# Container-internal files MUST stay LF or Docker build breaks on Windows clients
+container/**   text eol=lf
+*.sh           text eol=lf
+Dockerfile     text eol=lf
+docker-compose.yml text eol=lf
+entrypoint.sh  text eol=lf
+
+# Windows-native scripts stay CRLF
+*.ps1          text eol=crlf
+*.bat          text eol=crlf
+*.cmd          text eol=crlf

@@ -1,0 +1,13 @@
+把 TryHackMe 下載的 OpenVPN 設定檔放在這個資料夾，命名為：
+
+  vpn/config.ovpn
+
+THM 的設定檔已內含憑證，不需要 auth.txt。
+若你的 VPN 提供者要帳密，再多放一個：
+
+  vpn/auth.txt
+    第 1 行：username
+    第 2 行：password
+
+容器內會 mount 成 /vpn （唯讀）。
+進入容器後執行 `vpn-up` 即可連線。

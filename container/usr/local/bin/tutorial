@@ -1,0 +1,280 @@
+#!/usr/bin/env python3
+"""社課 shell 互動入門教學。
+
+設計：每一關出題，學員在內建 prompt 輸入指令，腳本實際幫他執行（在
+他自己的家目錄下），檢查輸出是否合題意。輸入空字串或 q 可跳出。
+"""
+import os
+import re
+import shlex
+import subprocess
+import sys
+import textwrap
+from dataclasses import dataclass
+from typing import Callable, List, Optional, Tuple
+
+GREEN = "\033[32m"
+RED = "\033[31m"
+YELLOW = "\033[33m"
+CYAN = "\033[36m"
+DIM = "\033[2m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+
+def header(s: str) -> None:
+    print(f"\n{CYAN}{BOLD}━━━ {s} ━━━{RESET}")
+
+
+def ok(s: str) -> None:
+    print(f"{GREEN}✓ {s}{RESET}")
+
+
+def bad(s: str) -> None:
+    print(f"{RED}✗ {s}{RESET}")
+
+
+def hint(s: str) -> None:
+    print(f"{YELLOW}提示：{s}{RESET}")
+
+
+def explain(s: str) -> None:
+    print(f"{DIM}{textwrap.dedent(s).strip()}{RESET}")
+
+
+def run(cmd: str, cwd: str) -> Tuple[str, str, int]:
+    try:
+        r = subprocess.run(
+            cmd,
+            shell=True,
+            executable="/bin/bash",
+            capture_output=True,
+            text=True,
+            cwd=cwd,
+            timeout=15,
+        )
+        return r.stdout, r.stderr, r.returncode
+    except subprocess.TimeoutExpired:
+        return "", "(指令執行超過 15 秒，已中斷)", -1
+
+
+@dataclass
+class Step:
+    title: str
+    intro: str
+    hint_text: str
+    check: Callable[[str, str, str, int, dict], bool]
+    success: str
+    cwd_action: Optional[Callable[[str, str, str, int, dict, str], str]] = None
+
+
+def play(step: Step, state: dict) -> bool:
+    header(step.title)
+    explain(step.intro)
+    print()
+    cwd = state["cwd"]
+    for attempt in range(4):
+        try:
+            cmd = input(f"{BOLD}lab{RESET}:{cwd}$ ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return False
+        if cmd in ("q", "quit", "exit"):
+            return False
+        if cmd == "":
+            print(DIM + "（請輸入一個指令，或輸入 q 離開）" + RESET)
+            continue
+        out, err, rc = run(cmd, cwd)
+        if out:
+            sys.stdout.write(out if out.endswith("\n") else out + "\n")
+        if err:
+            sys.stdout.write(err if err.endswith("\n") else err + "\n")
+        if step.check(cmd, out, err, rc, state):
+            ok(step.success)
+            if step.cwd_action:
+                state["cwd"] = step.cwd_action(cmd, out, err, rc, state, cwd)
+            return True
+        if attempt == 0:
+            hint(step.hint_text)
+        elif attempt == 1:
+            hint("再試一次。回想剛才的提示。")
+        elif attempt == 2:
+            hint("最後一次機會了。輸入 q 可以跳出。")
+    bad("這一關先跳過。")
+    return True  # don't end whole tutorial
+
+
+def first_word(cmd: str) -> str:
+    try:
+        parts = shlex.split(cmd)
+        return parts[0] if parts else ""
+    except ValueError:
+        return cmd.split()[0] if cmd.split() else ""
+
+
+# ---------- 題目 ----------
+
+def step_pwd() -> Step:
+    return Step(
+        title="第 1 關：你在哪裡？",
+        intro="""
+            進入 shell 第一件事是搞清楚自己「在哪裡」。每個 shell 都有一個
+            當前工作目錄 (current working directory, CWD)。
+            請輸入一個能印出你目前位置的指令。
+        """,
+        hint_text="這個指令的縮寫意思是 'print working directory'。",
+        check=lambda c, o, e, r, s: first_word(c) == "pwd" and "/home/student" in o,
+        success="bingo！pwd 印出 absolute path。",
+    )
+
+
+def step_whoami() -> Step:
+    return Step(
+        title="第 2 關：你是誰？",
+        intro="""
+            在攻擊鍊裡，每次拿到 shell 第一件事就是問：「我現在是哪個使用者？」
+            請輸入一個能告訴你「目前登入身份」的指令。
+        """,
+        hint_text="字面意思就是英文翻譯：「我是誰」。",
+        check=lambda c, o, e, r, s: first_word(c) == "whoami" and o.strip() == "student",
+        success="你現在是 student。等到拿 shell 看到 'root' 才開心。",
+    )
+
+
+def step_id() -> Step:
+    return Step(
+        title="第 3 關：更詳細的身份",
+        intro="""
+            whoami 只告訴你 username。但 Linux 權限其實是看 UID/GID。
+            請輸入指令印出你的 UID、GID、跟所屬群組。
+        """,
+        hint_text="這個指令只有兩個字母，跟「身份」的英文有關。",
+        check=lambda c, o, e, r, s: first_word(c) == "id" and "uid=" in o,
+        success="記住 UID 0 = root。看到 uid=0 就是中了。",
+    )
+
+
+def step_ls() -> Step:
+    return Step(
+        title="第 4 關：看看四周有什麼",
+        intro="""
+            列出目前目錄裡有哪些檔案/資料夾。最常用的指令只有兩個字母。
+        """,
+        hint_text="list 的縮寫。",
+        check=lambda c, o, e, r, s: first_word(c) == "ls" and r == 0,
+        success="ls = list。預設不會顯示開頭是 . 的隱藏檔。",
+    )
+
+
+def step_ls_a() -> Step:
+    return Step(
+        title="第 5 關：被藏起來的檔案",
+        intro="""
+            Linux 中開頭為 . 的檔案（例如 .bashrc, .ssh）預設是隱藏的。
+            請用一個 ls 的選項把所有檔案（包含隱藏檔）都列出來。
+        """,
+        hint_text="加上 -a 或 -la 旗標。",
+        check=lambda c, o, e, r, s: first_word(c) == "ls" and ("-a" in c or "-la" in c or "-al" in c) and ".bashrc" in o,
+        success="-a = all。同時 -l 可以看詳細權限/大小/時間。",
+    )
+
+
+def step_cd() -> Step:
+    return Step(
+        title="第 6 關：移動到其它目錄",
+        intro="""
+            請切換到 /tmp 目錄。
+        """,
+        hint_text="cd <路徑>。/tmp 是任何使用者都能寫的暫存目錄。",
+        check=lambda c, o, e, r, s: first_word(c) == "cd" and r == 0 and "/tmp" in c,
+        success="切換成功。等下用 pwd 確認也可以。",
+        cwd_action=lambda c, o, e, r, s, cwd: "/tmp",
+    )
+
+
+def step_mkdir_touch() -> Step:
+    return Step(
+        title="第 7 關：建立資料夾與檔案",
+        intro="""
+            在 /tmp 裡建立一個叫 lab-test 的資料夾。
+        """,
+        hint_text="mkdir <資料夾名稱>。",
+        check=lambda c, o, e, r, s: first_word(c) == "mkdir" and r == 0 and os.path.isdir("/tmp/lab-test"),
+        success="建好了。下一關來放東西進去。",
+    )
+
+
+def step_redirect() -> Step:
+    return Step(
+        title="第 8 關：把指令的輸出寫進檔案",
+        intro="""
+            shell 的精華之一：用 > 把標準輸出寫進檔案。
+            請把 'hello shell' 這個字串寫進 /tmp/lab-test/note.txt。
+        """,
+        hint_text="echo 'hello shell' > /tmp/lab-test/note.txt",
+        check=lambda c, o, e, r, s: ">" in c and os.path.isfile("/tmp/lab-test/note.txt") and "hello shell" in open("/tmp/lab-test/note.txt").read(),
+        success="> 是 redirect。>> 是 append（不覆蓋）。",
+    )
+
+
+def step_cat() -> Step:
+    return Step(
+        title="第 9 關：讀檔",
+        intro="""
+            把剛剛寫的 /tmp/lab-test/note.txt 印出來看。
+        """,
+        hint_text="最常見的工具叫 cat。",
+        check=lambda c, o, e, r, s: first_word(c) == "cat" and "hello shell" in o,
+        success="cat 適合短檔。長檔用 less / more 比較不會洗版。",
+    )
+
+
+def step_pipe() -> Step:
+    return Step(
+        title="第 10 關：管線 (pipe)",
+        intro="""
+            shell 真正強大的地方：把 A 指令的輸出直接餵給 B 指令。
+            請用「兩個指令 + pipe」找出 /etc/passwd 裡含有 'root' 的那幾行。
+        """,
+        hint_text="cat /etc/passwd | grep root",
+        check=lambda c, o, e, r, s: ("|" in c) and ("grep" in c) and ("root" in c) and ("root:" in o),
+        success="| 是 pipe，grep 是關鍵字過濾。整個 unix 哲學就是「小工具用 pipe 串起來」。",
+    )
+
+
+STEPS = [
+    step_pwd, step_whoami, step_id, step_ls, step_ls_a,
+    step_cd, step_mkdir_touch, step_redirect, step_cat, step_pipe,
+]
+
+
+def main() -> int:
+    print(f"{BOLD}{CYAN}社課 shell 入門教學{RESET}")
+    print()
+    print("這個教學會出 10 題。輸入 q 隨時離開。")
+    print("每一題你會看到一個 prompt，請在那邊輸入指令，腳本會幫你執行。")
+    print()
+
+    state: dict = {"cwd": os.path.expanduser("~")}
+    completed = 0
+    for fn in STEPS:
+        if not play(fn(), state):
+            break
+        completed += 1
+
+    print()
+    header("教學結束")
+    print(f"完成 {completed}/{len(STEPS)} 關。")
+    if completed == len(STEPS):
+        print(f"{GREEN}全破！下一步可以試 cheat reverse-shell 或 cheat tmux。{RESET}")
+    else:
+        print(f"{YELLOW}下次再來把剩下的關卡破完。{RESET}")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print()
+        sys.exit(130)

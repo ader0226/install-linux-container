@@ -1,0 +1,5 @@
+vpn/*.ovpn
+vpn/*.conf
+vpn/auth.txt
+vpn/config.ovpn
+!vpn/PLACE_YOUR_OVPN_HERE.txt

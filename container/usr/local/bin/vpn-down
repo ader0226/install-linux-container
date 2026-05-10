@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $EUID -ne 0 ]]; then
+    exec sudo "$0" "$@"
+fi
+
+PIDFILE=/run/openvpn.pid
+
+if [[ -f "$PIDFILE" ]]; then
+    pid="$(cat "$PIDFILE")"
+    if kill "$pid" 2>/dev/null; then
+        echo "已送 SIGTERM 給 openvpn (pid $pid)"
+    fi
+    rm -f "$PIDFILE"
+else
+    pkill -x openvpn 2>/dev/null || true
+fi
+
+# Wait until tun0 disappears
+for i in {1..10}; do
+    if ! ip link show tun0 >/dev/null 2>&1; then
+        echo "openvpn 已停止"
+        exit 0
+    fi
+    sleep 1
+done
+
+echo "openvpn 似乎還在跑，請手動檢查（pgrep openvpn）" >&2
+exit 1

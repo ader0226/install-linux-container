@@ -1,0 +1,15 @@
+services:
+  lab:
+    build: .
+    image: shell-lab:latest
+    container_name: shell-lab
+    hostname: lab
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./vpn:/vpn:ro
+    ports:
+      - "127.0.0.1:2222:22"
+    restart: unless-stopped

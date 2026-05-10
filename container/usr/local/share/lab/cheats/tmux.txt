@@ -1,0 +1,50 @@
+TMUX CHEAT SHEET
+================
+
+進出
+  tmux                        開新 session
+  tmux new -s lab             命名為 lab
+  tmux ls                     列出所有 session
+  tmux attach                 重新接上最近的
+  tmux attach -t lab          接上指定 session
+  Ctrl-b d                    detach（保留 session 在背景）
+
+預設前綴鍵 = Ctrl-b（按完放開再按下面那個鍵）
+
+Pane（同一個 window 切割畫面）
+  Ctrl-b |        垂直分割（lab 預設綁定）
+  Ctrl-b -        水平分割（lab 預設綁定）
+  Ctrl-b "        水平分割（原生）
+  Ctrl-b %        垂直分割（原生）
+  Ctrl-b 方向鍵   切換 pane
+  Ctrl-b z        當前 pane 全螢幕 toggle
+  Ctrl-b x        關掉當前 pane
+  Ctrl-b {  }     互換 pane 位置
+  Ctrl-b 空白鍵   循環內建 layout
+
+Window（分頁）
+  Ctrl-b c        建新 window
+  Ctrl-b 0..9     切換到第 N 個 window
+  Ctrl-b n  p     下一個 / 前一個
+  Ctrl-b ,        重新命名當前 window
+  Ctrl-b &        關掉當前 window
+
+捲動 / 複製模式
+  Ctrl-b [        進入 copy mode（Ctrl-b PgUp 也行）
+    方向鍵 / PgUp/PgDn   捲動
+    /  ?           搜尋
+    空白鍵         開始選取
+    Enter          複製（到 tmux buffer）
+    q              離開
+  Ctrl-b ]        貼上
+
+雜項
+  Ctrl-b r        重新讀 ~/.tmux.conf（lab 已綁定）
+  Ctrl-b ?        看所有快捷鍵清單
+  Ctrl-b :        進指令模式（例：:set mouse on）
+
+社課推薦動作流
+  1. 一進容器先：tmux new -s lab
+  2. Ctrl-b |  分左右，左邊 attacker、右邊 victim
+  3. 想看 cheat：Ctrl-b c 開新 window 跑 `cheat reverse-shell`
+  4. 要離開 lab：Ctrl-b d（不會殺掉 session，下次 attach 就回來）

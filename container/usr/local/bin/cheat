@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CHEAT_DIR="/usr/local/share/lab/cheats"
+
+usage() {
+    echo "用法： cheat <主題>"
+    echo
+    echo "可用主題："
+    for f in "$CHEAT_DIR"/*.txt; do
+        printf "  %s\n" "$(basename "$f" .txt)"
+    done
+}
+
+if [[ $# -eq 0 ]]; then
+    usage
+    exit 0
+fi
+
+topic="$1"
+file="$CHEAT_DIR/$topic.txt"
+
+if [[ ! -f "$file" ]]; then
+    echo "找不到主題：$topic" >&2
+    echo
+    usage
+    exit 1
+fi
+
+if [[ -t 1 ]]; then
+    # LESSOPEN= 關掉 lesspipe（會把某些檔案誤判為 binary）
+    LESSOPEN= LESSCHARSET=utf-8 less -R "$file"
+else
+    cat "$file"
+fi

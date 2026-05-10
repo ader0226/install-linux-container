@@ -1,0 +1,56 @@
+SHELL CHEAT SHEET
+=================
+
+定位 / 移動
+  pwd                         我在哪
+  ls          ls -la          看當前目錄
+  cd <path>   cd ~   cd -     切換目錄（- 是上一個）
+  tree -L 2                   樹狀檢視（限兩層）
+
+身份 / 權限
+  whoami                      目前使用者
+  id                          UID/GID/groups
+  sudo -l                     我能用 sudo 跑哪些
+  chmod 755 file              改權限
+  chown user:group file       改擁有者
+
+讀檔 / 編輯
+  cat file                    印整個檔案
+  less file                   分頁；q 離開、/foo 搜尋
+  head -n 20 file
+  tail -n 20 file             tail -f file 即時跟看
+  vim file    nano file       編輯（離開 vim 用 :q!）
+
+找東西
+  find . -name '*.conf'       依檔名找
+  grep -rni 'password' .      遞迴內容搜尋（i 忽略大小寫、n 顯示行號）
+  which python3               指令路徑
+  history | grep ssh          翻自己的歷史指令
+
+I/O 重導 / pipe
+  cmd > file                  覆寫
+  cmd >> file                 附加
+  cmd 2> err                  把 stderr 導到 err
+  cmd1 | cmd2                 pipe：cmd1 的 stdout 接 cmd2 的 stdin
+  cmd1 && cmd2                cmd1 成功才跑 cmd2
+  cmd1 || cmd2                cmd1 失敗才跑 cmd2
+
+變數 / 替換
+  echo "hi $USER"             變數展開
+  echo "$(date)"              指令替換
+  export FOO=bar              傳給子 process
+  echo $?                     上一個指令的 exit code
+
+迴圈 / 條件（一行版）
+  for i in 1 2 3; do echo $i; done
+  for f in *.txt; do echo "$f"; done
+  if [[ -f file ]]; then echo yes; fi
+
+網路探測
+  ip a                        看本機 IP
+  ip route                    看路由
+  ping -c 3 host
+  curl -v http://host/        看 HTTP 對話
+  curl -I http://host/        只看 headers
+  nc -lnvp 4444               開一個 TCP listener
+  nmap -sV -p- host           全 port + 服務指紋（lab 沒預裝，先 sudo apt install nmap）

@@ -1,0 +1,59 @@
+THM (TryHackMe) CHEAT SHEET
+===========================
+
+完整流程
+  HOST                      CONTAINER                          THM
+  ──────────                ─────────                          ───
+  ssh -p 2222 student@127.0.0.1
+                            $ vpn-up
+                            (等到看到 "tun0 IP: ..." )
+                            $ ip route                         (確認 tun0 路由)
+                            $ ping -c 2 <TARGET_IP>              (測連得到靶機)
+
+  ── 想用瀏覽器看靶機網頁時，host 端再開一個終端機： ──
+  ssh -p 2222 -L 8080:<TARGET_IP>:80 student@127.0.0.1
+  瀏覽器：http://127.0.0.1:8080
+
+VPN 操作（容器內）
+  vpn-up                    啟動 OpenVPN（讀 /vpn/config.ovpn）
+  vpn-down                  斷開
+  sudo tail -f /var/log/openvpn.log
+  ip addr show tun0
+  ip route | grep tun0
+
+把 .ovpn 放進來
+  在 host 端把檔案放到 ./vpn/config.ovpn （docker-compose 會 mount 為 /vpn）
+
+SSH local port forward 公式
+  ssh -p 2222 -L <HOST_PORT>:<TARGET_IP>:<TARGET_PORT> student@127.0.0.1
+
+  常見對照：
+    HTTP   80  →  -L 8080:<TARGET_IP>:80    開 http://127.0.0.1:8080
+    HTTPS  443 →  -L 8443:<TARGET_IP>:443   開 https://127.0.0.1:8443
+    8080       →  -L 8081:<TARGET_IP>:8080  開 http://127.0.0.1:8081
+    SSH    22  →  -L 2200:<TARGET_IP>:22    再 ssh -p 2200 user@127.0.0.1
+
+  -L 可以重複下，一次轉多個 port：
+    ssh -p 2222 -L 8080:<TARGET_IP>:80 -L 8443:<TARGET_IP>:443 student@127.0.0.1
+
+工具安裝（lab 預設沒裝，現場自己裝）
+  sudo apt update
+  sudo apt install -y nmap gobuster
+
+預先打包好的 wordlist
+  /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt
+
+掃描靶機（容器內）
+  nmap -sV -sC -p- -T4 <TARGET_IP>         全 port + 服務指紋 + 預設 script
+  nmap -sV --top-ports 100 <TARGET_IP>     快速版（先看常見 100 個）
+  gobuster dir -u http://<TARGET_IP> \
+    -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt
+  curl -I http://<TARGET_IP>/              抓 HTTP banner
+
+常見問題
+  vpn-up 後 ping 不到靶機
+    → THM 的房間「Start Machine」要按下去，等到顯示 active。
+  AUTH_FAILED
+    → THM 的 .ovpn 不需要帳密，多半是 .ovpn 下載到一半壞掉，重下一份。
+  port forward 連不到
+    → 確認容器內 vpn 已經連上（ping 得到靶機），而且 IP 真的是 THM 那台。
