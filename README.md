@@ -4,9 +4,10 @@
 
 ## 30 秒上手
 
-1. 安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 與一個 Chromium 系 browser（Chrome / Edge / Brave）。
-2. `cd` 到放 `xxx.ovpn` 的資料夾。
-3. 貼一行指令：
+1. 具備一個 Chromium 系 browser（Chrome / Edge / Brave），並且安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 
+2. 建立一個資料夾，裡面放一個 `xxx.ovpn` 檔案
+3. 開啟終端進入此資料夾
+4. 貼一行指令：
 
    ```bash
    # macOS / Linux
@@ -60,7 +61,7 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │ HOST (Windows / macOS / Linux)                                  │
 │                                                                 │
-│   browser (獨立 profile, --proxy-server=socks5://127.0.0.1:PORT)│
+│   browser (profile, --proxy-server=socks5://127.0.0.1:PORT)     │
 │        │                                                        │
 │        ▼ SOCKS5                                                 │
 │   127.0.0.1:PORT  ◀──── docker compose port mapping ────┐       │
@@ -73,9 +74,9 @@
 │ CONTAINER (debian:bookworm-slim)                                │
 │                                                                 │
 │   microsocks 0.0.0.0:1080  (SOCKS5)                             │
-│   OpenVPN ─── tun0 ──► THM 靶機網段                             │
+│   OpenVPN ─── tun0 ──► THM Subnet                               │
 │                                                                 │
-│   學員互動：tutorial / cheat / tmux / nmap / gobuster ...       │
+│   Commands: tutorial / cheat / tmux / nmap / gobuster ...       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -124,3 +125,4 @@ GitHub Actions 已自動 build multi-arch（amd64 + arm64）push 到 GHCR：
 | 沒找到 Chromium 系 browser | 裝 Chrome/Edge/Brave，或手動在現有 browser 設 SOCKS5（位址腳本會印） |
 | browser 連不到靶機 | 確認用的是 install 腳本開的那個獨立 profile（你主 browser 沒設 proxy） |
 | 想徹底重來 | `docker compose -f .install-linux-container/docker-compose.yml down && rm -rf .install-linux-container` |
+| 卡住等太久？ | 按一下 `Ctrl + C` 可能會發生一些事 |
