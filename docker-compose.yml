@@ -1,7 +1,7 @@
 services:
   lab:
+    image: ghcr.io/ader0226/shell-attack-lab:latest
     build: .
-    image: shell-lab:latest
     container_name: shell-lab
     hostname: lab
     cap_add:

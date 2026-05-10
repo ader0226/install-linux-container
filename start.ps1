@@ -2,7 +2,8 @@
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 
-docker compose up -d --build
+docker compose pull 2>&1 | Out-Host
+docker compose up -d
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host ''
