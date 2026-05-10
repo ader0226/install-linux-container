@@ -2,11 +2,6 @@ name = "install-linux-container"
 main = "src/index.ts"
 compatibility_date = "2025-12-01"
 
-# Bind the custom domain. ader.pw zone must be in the same Cloudflare account.
-routes = [
-  { pattern = "install-linux-container.ader.pw", custom_domain = true }
-]
-
 # Bundle install.sh / install.ps1 as text imports.
 [[rules]]
 type = "Text"
