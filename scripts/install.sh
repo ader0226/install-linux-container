@@ -114,7 +114,7 @@ launch_browser() {
             for app in "Google Chrome" "Microsoft Edge" "Brave Browser" "Chromium" "Arc"; do
                 if [[ -d "/Applications/$app.app" ]]; then
                     open -na "$app" --args "${PROXY_FLAGS[@]}" >/dev/null 2>&1 &
-                    cyan "✓ 已用 $app 開啟（SOCKS5 127.0.0.1:$PROXY_PORT）"
+                    cyan "✓ 已用 ${app} 開啟（SOCKS5 127.0.0.1:${PROXY_PORT}）"
                     return 0
                 fi
             done
@@ -124,7 +124,7 @@ launch_browser() {
                        microsoft-edge microsoft-edge-stable brave-browser; do
                 if command -v "$bin" >/dev/null 2>&1; then
                     "$bin" "${PROXY_FLAGS[@]}" >/dev/null 2>&1 &
-                    cyan "✓ 已用 $bin 開啟（SOCKS5 127.0.0.1:$PROXY_PORT）"
+                    cyan "✓ 已用 ${bin} 開啟（SOCKS5 127.0.0.1:${PROXY_PORT}）"
                     return 0
                 fi
             done

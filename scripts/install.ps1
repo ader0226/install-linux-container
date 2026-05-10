@@ -124,7 +124,7 @@ $launched = $false
 foreach ($b in $browsers) {
   if ($b.Path -and (Test-Path $b.Path)) {
     Start-Process -FilePath $b.Path -ArgumentList $proxyArgs | Out-Null
-    Write-Cyan "✓ 已用 $($b.Name) 開啟（SOCKS5 127.0.0.1:$proxyPort）"
+    Write-Cyan "✓ 已用 $($b.Name) 開啟（SOCKS5 127.0.0.1:${proxyPort}）"
     $launched = $true
     break
   }
