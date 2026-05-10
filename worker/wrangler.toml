@@ -1,9 +1,3 @@
 name = "install-linux-container"
 main = "src/index.ts"
 compatibility_date = "2025-12-01"
-
-# Bundle install.sh / install.ps1 as text imports.
-[[rules]]
-type = "Text"
-globs = ["**/*.sh", "**/*.ps1"]
-fallthrough = true
