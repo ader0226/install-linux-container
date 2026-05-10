@@ -4,7 +4,7 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
-$Image = if ($env:SHELL_LAB_IMAGE) { $env:SHELL_LAB_IMAGE } else { 'ghcr.io/ader0226/shell-attack-lab:latest' }
+$Image = if ($env:SHELL_LAB_IMAGE) { $env:SHELL_LAB_IMAGE } else { 'ghcr.io/ader0226/install-linux-container:latest' }
 
 function Write-Red    ($m) { Write-Host $m -ForegroundColor Red }
 function Write-Green  ($m) { Write-Host $m -ForegroundColor Green }

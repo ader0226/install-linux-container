@@ -4,7 +4,7 @@
 #   /bin/bash -c "$(curl -fsSL <INSTALL_URL>)"
 set -euo pipefail
 
-IMAGE="${SHELL_LAB_IMAGE:-ghcr.io/ader0226/shell-attack-lab:latest}"
+IMAGE="${SHELL_LAB_IMAGE:-ghcr.io/ader0226/install-linux-container:latest}"
 
 red()    { printf '\033[31m%s\033[0m\n' "$*"; }
 green()  { printf '\033[32m%s\033[0m\n' "$*"; }

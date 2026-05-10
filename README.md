@@ -102,7 +102,7 @@ npx wrangler deploy
 ## Docker image
 
 GitHub Actions 已自動 build multi-arch（amd64 + arm64）push 到 GHCR：
-`ghcr.io/ader0226/shell-attack-lab:latest`
+`ghcr.io/ader0226/install-linux-container:latest`
 
 要同時推 Docker Hub，在 `.github/workflows/build.yml` 增加：
 

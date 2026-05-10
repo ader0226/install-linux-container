@@ -1,6 +1,6 @@
 services:
   lab:
-    image: ghcr.io/ader0226/shell-attack-lab:latest
+    image: ghcr.io/ader0226/install-linux-container:latest
     build: .
     container_name: shell-lab
     hostname: lab
