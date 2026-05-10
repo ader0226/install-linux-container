@@ -1,10 +1,10 @@
-# shell-attack-lab universal installer (Windows / PowerShell 5.1+)
+# install-linux-container universal installer (Windows / PowerShell 5.1+)
 # 在含有 xxx.ovpn 的目錄下執行：
 #   iex "& { $(iwr -useb <INSTALL_URL>) }"
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
-$Image = if ($env:SHELL_LAB_IMAGE) { $env:SHELL_LAB_IMAGE } else { 'ghcr.io/ader0226/install-linux-container:latest' }
+$Image = if ($env:LINUX_CONTAINER_IMAGE) { $env:LINUX_CONTAINER_IMAGE } else { 'ghcr.io/ader0226/install-linux-container:latest' }
 
 function Write-Red    ($m) { Write-Host $m -ForegroundColor Red }
 function Write-Green  ($m) { Write-Host $m -ForegroundColor Green }
@@ -36,7 +36,7 @@ $ovpnFile = $ovpns[0].Name
 Write-Green "✓ 使用 VPN 設定: $ovpnFile"
 
 # ── 3. state dir ─────────────────────────────────────────────────
-$stateDir    = Join-Path $ovpnDir '.shell-attack-lab'
+$stateDir    = Join-Path $ovpnDir '.install-linux-container'
 New-Item -ItemType Directory -Force -Path $stateDir | Out-Null
 $envFile     = Join-Path $stateDir '.env'
 $composeFile = Join-Path $stateDir 'docker-compose.yml'
@@ -64,7 +64,7 @@ $ovpnDirYaml = ($ovpnDir -replace '\\','/')
 services:
   lab:
     image: $Image
-    container_name: shell-lab
+    container_name: linux-container
     hostname: lab
     cap_add:
       - NET_ADMIN
@@ -101,7 +101,7 @@ if (-not $ok) {
 }
 
 # ── 8. 開 Chromium 系 browser，帶 SOCKS5 proxy ─────────────────
-$tmpProfile = Join-Path $env:TEMP "shell-lab-profile-$proxyPort"
+$tmpProfile = Join-Path $env:TEMP "linux-container-profile-$proxyPort"
 New-Item -ItemType Directory -Force -Path $tmpProfile | Out-Null
 
 $proxyArgs = @(

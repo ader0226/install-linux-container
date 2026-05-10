@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# shell-attack-lab universal installer (macOS / Linux)
+# install-linux-container universal installer (macOS / Linux)
 # 在含有 xxx.ovpn 的目錄下執行：
 #   /bin/bash -c "$(curl -fsSL <INSTALL_URL>)"
 set -euo pipefail
 
-IMAGE="${SHELL_LAB_IMAGE:-ghcr.io/ader0226/install-linux-container:latest}"
+IMAGE="${LINUX_CONTAINER_IMAGE:-ghcr.io/ader0226/install-linux-container:latest}"
 
 red()    { printf '\033[31m%s\033[0m\n' "$*"; }
 green()  { printf '\033[32m%s\033[0m\n' "$*"; }
@@ -37,7 +37,7 @@ OVPN_FILE="$(basename "${ovpns[0]}")"
 green "✓ 使用 VPN 設定: $OVPN_FILE"
 
 # ── 3. state dir ─────────────────────────────────────────────────
-STATE_DIR="$OVPN_DIR/.shell-attack-lab"
+STATE_DIR="$OVPN_DIR/.install-linux-container"
 mkdir -p "$STATE_DIR"
 ENV_FILE="$STATE_DIR/.env"
 COMPOSE_FILE="$STATE_DIR/docker-compose.yml"
@@ -61,7 +61,7 @@ cat > "$COMPOSE_FILE" <<EOF
 services:
   lab:
     image: $IMAGE
-    container_name: shell-lab
+    container_name: linux-container
     hostname: lab
     cap_add:
       - NET_ADMIN
@@ -99,7 +99,7 @@ if [[ "${ok:-}" != "1" ]]; then
 fi
 
 # ── 8. 開 Chromium 系 browser，帶 SOCKS5 proxy ─────────────────
-TMP_PROFILE="$(mktemp -d -t shell-lab-profile.XXXXXX)"
+TMP_PROFILE="$(mktemp -d -t linux-container-profile.XXXXXX)"
 PROXY_FLAGS=(
     "--user-data-dir=$TMP_PROFILE"
     "--proxy-server=socks5://127.0.0.1:$PROXY_PORT"

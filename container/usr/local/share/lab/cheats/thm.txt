@@ -49,7 +49,7 @@ SOCKS5 proxy 操作（容器內）
 
 常見問題
   browser 連不到 SOCKS5
-    → 容器是否還活著：docker ps | grep shell-lab
+    → 容器是否還活著：docker ps | grep linux-container
     → 重新跑 install 腳本即可恢復。
   ping 不到靶機
     → THM 房間「Start Machine」要按下去；ip link show tun0 看 VPN 是否真上。

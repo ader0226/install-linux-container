@@ -1,4 +1,4 @@
-// shell-attack-lab universal installer dispatcher.
+// install-linux-container universal installer dispatcher.
 // User-Agent routing:
 //   curl / wget / libcurl  -> install.sh   (text/plain)
 //   PowerShell             -> install.ps1  (text/plain)
@@ -25,7 +25,7 @@ function htmlPage(installUrl: string): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>shell-attack-lab installer</title>
+<title>install-linux-container installer</title>
 <style>
   :root { color-scheme: light dark; }
   body { font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -39,7 +39,7 @@ function htmlPage(installUrl: string): string {
 </style>
 </head>
 <body>
-<h1>shell-attack-lab installer</h1>
+<h1>install-linux-container installer</h1>
 <p class="hint">在含有 <code>xxx.ovpn</code> 的目錄下，依作業系統選一個指令貼到終端機。</p>
 
 <h2>macOS / Linux</h2>

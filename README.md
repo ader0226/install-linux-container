@@ -123,4 +123,4 @@ GitHub Actions 已自動 build multi-arch（amd64 + arm64）push 到 GHCR：
 | `tun0 30 秒內未上線` | `.ovpn` 壞掉重下一份；THM 房間要先 Start Machine |
 | 沒找到 Chromium 系 browser | 裝 Chrome/Edge/Brave，或手動在現有 browser 設 SOCKS5（位址腳本會印） |
 | browser 連不到靶機 | 確認用的是 install 腳本開的那個獨立 profile（你主 browser 沒設 proxy） |
-| 想徹底重來 | `docker compose -f .shell-attack-lab/docker-compose.yml down && rm -rf .shell-attack-lab` |
+| 想徹底重來 | `docker compose -f .install-linux-container/docker-compose.yml down && rm -rf .install-linux-container` |
